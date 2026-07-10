@@ -5,12 +5,28 @@ const analyzeRoute = require("./routes/analyze");
 
 const app = express();
 
-// Allow requests from any origin (handles Vercel frontend domain)
-app.use(cors({
+const corsOptions = {
     origin: "*",
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-}));
+};
+
+// Handle CORS preflight OPTIONS requests explicitly (prevents Vercel redirect issue)
+app.options("*", cors(corsOptions));
+
+// Apply CORS to all routes
+app.use(cors(corsOptions));
+
+// Manually set headers as a safety net for all responses
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (req.method === "OPTIONS") {
+        return res.sendStatus(200);
+    }
+    next();
+});
 
 app.use(express.json());
 app.use("/analyze", analyzeRoute);
