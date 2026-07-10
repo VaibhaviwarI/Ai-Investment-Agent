@@ -1,29 +1,19 @@
 const express = require("express");
-const cors = require("cors");
 require("dotenv").config();
 const analyzeRoute = require("./routes/analyze");
 
 const app = express();
 
-const corsOptions = {
-    origin: "*",
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-};
-
-// Handle CORS preflight OPTIONS requests explicitly (prevents Vercel redirect issue)
-app.options("*", cors(corsOptions));
-
-// Apply CORS to all routes
-app.use(cors(corsOptions));
-
-// Manually set headers as a safety net for all responses
+// Manual CORS middleware — full control, no package conflicts
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+    // Respond immediately to preflight OPTIONS requests with 200
     if (req.method === "OPTIONS") {
-        return res.sendStatus(200);
+        res.status(200).end();
+        return;
     }
     next();
 });
