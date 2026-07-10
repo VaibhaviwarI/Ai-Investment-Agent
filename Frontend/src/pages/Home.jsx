@@ -32,8 +32,9 @@ function Home() {
 
             setResult(null);
 
+            const apiBaseUrl = import.meta.env.VITE_API_URL || "http://localhost:3000";
             const response = await axios.post(
-                "http://localhost:3000/analyze",
+                `${apiBaseUrl}/analyze`,
                 {
                     company
                 }
